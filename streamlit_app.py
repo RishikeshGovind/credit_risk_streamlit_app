@@ -14,9 +14,11 @@ st.set_page_config(page_title="German Credit Risk Analysis", layout="wide")
 
 @st.cache_data
 def load_data():
-    url = "https://raw.githubusercontent.com/RishikeshGovind/credit_risk_streamlit_app/main/german_credit_data.csv"
-    df = pd.read_csv(url)
-    df.columns = [col.lower() for col in df.columns]
+    df = pd.read_csv("german_credit_data.csv")
+    if 'risk' not in df.columns:
+        st.error("⚠️ The dataset is missing the 'risk' column required for modeling. Please upload the correct version.")
+        st.stop()
+    df.columns = [col.lower() for col in df.columns]  # standardize column names
     return df
 
 df = load_data()
