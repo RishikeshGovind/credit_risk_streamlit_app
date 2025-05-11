@@ -12,7 +12,8 @@ import shap
 # Load the dataset
 @st.cache_data
 def load_data():
-    return pd.read_csv('https://raw.githubusercontent.com/RishikeshGovind/Credit-card-risk-modelling/main/german_credit_data.csv')
+    url = 'https://raw.githubusercontent.com/RishikeshGovind/credit_risk_streamlit_app/refs/heads/main/german_credit_data.csv'
+    return pd.read_csv(url)
 
 df = load_data()
 
