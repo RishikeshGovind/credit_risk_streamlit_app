@@ -100,7 +100,7 @@ fig, ax = plt.subplots()
 ax.plot(recall, precision, marker='.')
 ax.set_xlabel('Recall')
 ax.set_ylabel('Precision')
-ax.set_title('Precision-Recall Curve")
+ax.set_title('Precision-Recall Curve')
 st.pyplot(fig)
 
 # SHAP Feature Importance
