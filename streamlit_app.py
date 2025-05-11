@@ -14,8 +14,9 @@ st.set_page_config(page_title="German Credit Risk Analysis", layout="wide")
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("german_credit_data.csv")
-    df.columns = [col.lower() for col in df.columns]  # standardize column names
+    url = "https://raw.githubusercontent.com/RishikeshGovind/credit_risk_streamlit_app/main/german_credit_data.csv"
+    df = pd.read_csv(url)
+    df.columns = [col.lower() for col in df.columns]
     return df
 
 df = load_data()
