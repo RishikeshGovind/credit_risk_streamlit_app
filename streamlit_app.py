@@ -14,28 +14,38 @@ st.set_page_config(page_title="German Credit Risk Analysis", layout="wide")
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("german_credit_data.csv")
+    df = pd.read_csv("german_credit_data.csv")
+    df.columns = [col.lower() for col in df.columns]  # standardize column names
+    return df
 
 df = load_data()
 
 st.title("German Credit Risk Analysis Dashboard")
 
-# Sidebar Filters
+# Display available columns for debugging
+st.write("Available columns:", df.columns.tolist())
+
+# Sidebar Filters with safer access
 with st.sidebar:
     st.header("Filter Data")
-    sex = st.selectbox("Select Sex", options=["All"] + list(df['Sex'].unique()))
-    job = st.selectbox("Select Job", options=["All"] + list(df['Job'].unique()))
-    housing = st.selectbox("Select Housing", options=["All"] + list(df['Housing'].unique()))
+
+    sex_col = "sex"
+    job_col = "job"
+    housing_col = "housing"
+
+    sex = st.selectbox("Select Sex", options=["All"] + sorted(df[sex_col].dropna().unique().tolist()) if sex_col in df else ["N/A"])
+    job = st.selectbox("Select Job", options=["All"] + sorted(df[job_col].dropna().unique().tolist()) if job_col in df else ["N/A"])
+    housing = st.selectbox("Select Housing", options=["All"] + sorted(df[housing_col].dropna().unique().tolist()) if housing_col in df else ["N/A"])
 
     filtered_df = df.copy()
-    if sex != "All":
-        filtered_df = filtered_df[filtered_df['Sex'] == sex]
-    if job != "All":
-        filtered_df = filtered_df[filtered_df['Job'] == job]
-    if housing != "All":
-        filtered_df = filtered_df[filtered_df['Housing'] == housing]
+    if sex_col in df and sex != "All":
+        filtered_df = filtered_df[filtered_df[sex_col] == sex]
+    if job_col in df and job != "All":
+        filtered_df = filtered_df[filtered_df[job_col] == job]
+    if housing_col in df and housing != "All":
+        filtered_df = filtered_df[filtered_df[housing_col] == housing]
 
-# Show dataset
+# Show filtered dataset
 with st.expander("📊 View Filtered Dataset"):
     st.dataframe(filtered_df)
 
@@ -45,13 +55,12 @@ categorical_cols = df_model.select_dtypes(include=['object']).columns
 for col in categorical_cols:
     df_model[col] = LabelEncoder().fit_transform(df_model[col])
 
-X = df_model.drop('Risk', axis=1)
-y = df_model['Risk'].apply(lambda x: 1 if x == 'good' else 0)
+# Model training
+X = df_model.drop('risk', axis=1)
+y = df_model['risk'].apply(lambda x: 1 if x == 'good' else 0)
 
-# Train/test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Model training
 model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
@@ -59,7 +68,6 @@ y_proba = model.predict_proba(X_test)[:, 1]
 
 # Model Evaluation
 st.subheader("📈 Model Performance")
-
 col1, col2 = st.columns(2)
 
 with col1:
@@ -92,10 +100,10 @@ fig, ax = plt.subplots()
 ax.plot(recall, precision, marker='.')
 ax.set_xlabel('Recall')
 ax.set_ylabel('Precision')
-ax.set_title('Precision-Recall Curve')
+ax.set_title('Precision-Recall Curve")
 st.pyplot(fig)
 
-# SHAP
+# SHAP Feature Importance
 st.subheader("🔍 SHAP Feature Importance")
 explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test[:100])
